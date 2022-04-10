@@ -16,6 +16,7 @@ to generate this file without the comments in this block.
   , "catenable-lists"
   , "console"
   , "effect"
+  , "foldable-traversable"
   , "integers"
   , "math"
   , "minibench"

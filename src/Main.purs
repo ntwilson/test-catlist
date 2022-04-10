@@ -2,15 +2,20 @@ module Main where
 
 import Prelude
 
-import Data.Array (fold, foldMap, (..))
-import Data.Array as Array
+import Data.Array (foldMap, (..))
 import Data.CatList (CatList)
 import Data.CatList as Cat
+import Data.Foldable (class Foldable, foldl)
 import Data.Int as Int
 import Effect (Effect)
 import Effect.Console (log)
 import Math (sqrt)
-import Performance.Minibench (bench)
+import Performance.Minibench (bench, benchWith)
+
+foreign import arrayFromFoldableImpl :: ∀ a. ((Array a -> a -> Array a) -> Array a) -> Array a
+
+arrayFromFoldable :: ∀ f. Foldable f => f ~> Array
+arrayFromFoldable xs = arrayFromFoldableImpl (\fn -> foldl fn [] xs)
 
 catOfSize :: Int -> CatList Int
 catOfSize n = 
@@ -37,10 +42,10 @@ cat1_000_000 = catOfSize 1_000_000
 main :: Effect Unit
 main = do
   log "for 1,000:"
-  bench \_ -> Array.fromFoldable cat1_000
+  bench \_ -> arrayFromFoldable cat1_000
   log "for 10,000:"
-  bench \_ -> Array.fromFoldable cat10_000
+  bench \_ -> arrayFromFoldable cat10_000
   log "for 100,000:"
-  bench \_ -> Array.fromFoldable cat100_000
+  benchWith 200 \_ -> arrayFromFoldable cat100_000
   log "for 1,000,000:"
-  bench \_ -> Array.fromFoldable cat1_000_000
+  benchWith 50 \_ -> arrayFromFoldable cat1_000_000
